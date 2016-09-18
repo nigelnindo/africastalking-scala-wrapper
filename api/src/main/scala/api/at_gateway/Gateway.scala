@@ -1,6 +1,6 @@
 package api.at_gateway
 
-import scalaj.http.{Http,HttpRequest,HttpResponse}
+import scalaj.http.{HttpRequest,HttpResponse}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
