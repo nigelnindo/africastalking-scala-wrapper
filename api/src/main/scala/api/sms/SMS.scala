@@ -2,9 +2,9 @@ package api.sms
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import api.common.Common._
+import api.common.Common.SMS_URL
 
-import api.at_gateway.{RequestCreator, GatewayResponse, Gateway}
+import api.at_gateway.{GateWayResponse, RequestCreator, Gateway}
 
 import scalaj.http.{HttpRequest, Http}
 
@@ -51,7 +51,7 @@ case class SMSSender(username: String, apiKey: String) {
 
   }
 
-  val requestCreator = new RequestCreator[SMS] {
+  private val requestCreator = new RequestCreator[SMS] {
     override def createRequest(value: SMS): HttpRequest = value match {
       case SimpleSMS(num,msg) => httpRequestHelper(msg, List(num), None)
       case BulkSimpleSMS(nums, msg) => httpRequestHelper(msg, nums, None)
@@ -74,16 +74,16 @@ case class SMSSender(username: String, apiKey: String) {
     case PremiumSMS(sc, kw, num, msg) => Validated(Some(sms),None)
   }
 
-  def send(sms: SMS)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
+  def send(sms: SMS)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
     validate(sms) match {
       case Validated(_sms,err) if err.isEmpty => sendToGateway(_sms.get)
-      case Validated(_sms,err) if err.isDefined => Future {GatewayResponse(None, Some(err.get))}
+      case Validated(_sms,err) if err.isDefined => Future {GateWayResponse(None, Some(err.get))}
     }
   }
 
-  def sendToGateway(sms: SMS)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
+  def sendToGateway(sms: SMS)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
     Gateway.send(sms,requestCreator).recover{
-      case err => GatewayResponse(None, Some(err.toString))
+      case err => GateWayResponse(None, Some(err.toString))
     }
   }
 

@@ -1,6 +1,6 @@
 package api.at_gateway
 
-import scalaj.http.{HttpRequest,HttpResponse}
+import scalaj.http.HttpRequest
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,7 +12,7 @@ case class Gateway(uri: String){
   override def toString = uri
 }
 
-case class GatewayResponse(response: Option[String] = None, errorMessage: Option[String])
+case class GateWayResponse(response: Option[String] = None, errorMessage: Option[String])
 
 trait RequestCreator[A] {
   def createRequest(value: A): HttpRequest
@@ -20,18 +20,15 @@ trait RequestCreator[A] {
 
 case object Gateway{
 
-  def send(request: HttpRequest): Future[GatewayResponse] = Future {
+  def send(request: HttpRequest): Future[GateWayResponse] = Future {
     //throw new Exception("just throw something")
-    GatewayResponse(Some(request.asString.toString), None)
+    GateWayResponse(Some(request.asString.toString), None)
   }
 
-  def send[T](value: T, requestCreator: RequestCreator[T]): Future[GatewayResponse] = {
+  def send[T](value: T, requestCreator: RequestCreator[T]): Future[GateWayResponse] = {
     for {
       sendResult <- send(requestCreator.createRequest(value)).recover{
-        /**
-         * TODO: Pattern match to catch common error types (i.e No Connection error, 500 errors)
-         */
-        case err => GatewayResponse(None, Some(err.toString))
+        case err => GateWayResponse(None, Some(err.toString))
       }
     } yield sendResult
   }

@@ -8,15 +8,13 @@ import api.sms.{BulkSimpleSMS, SimpleSMS, SMSSender}
  * Created by nigelnindo on 9/17/16.
  */
 
-object Main {
+object Example {
   def main(args: Array[String]): Unit = {
 
     import scala.util.{Failure, Success}
 
     val API_KEY: String = "98f96d823dacff5c49bc752f1696f178b2d450033ced27e6c45d8cc59bf4da6f"
     val USER_NAME = "nigelnindo"
-
-    //println("running")
 
     /**
      * Create an SMSSender objects. Can be re-used as many times as desired, and does not block the current thread.
@@ -33,8 +31,8 @@ object Main {
      */
 
     sMSSender.send(BulkSimpleSMS(List("nigel","wiza","hungai"),"msg")).onComplete{
-      case Success(gatewayResponse) => println(gatewayResponse)
-      case Failure(err) =>
+      case Success(gatewayResponse) => println(gatewayResponse) //Access gateway response here
+      case Failure(err) => //
     }
 
     /**
