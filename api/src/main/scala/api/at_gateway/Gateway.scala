@@ -12,7 +12,7 @@ case class Gateway(uri: String){
   override def toString = uri
 }
 
-case class GateWayResponse(response: Option[String] = None, errorMessage: Option[String])
+case class GateWayResponse(response: Option[String] = None, error: Option[String])
 
 trait RequestCreator[A] {
   def createRequest(value: A): HttpRequest

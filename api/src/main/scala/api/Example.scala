@@ -2,7 +2,7 @@ package api
 
 import api.airtime.{AirtimeRecipient, AirtimeMultiple, AirtimeSender}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits.global // context for running future
 
 import api.sms.{BulkSimpleSMS, SimpleSMS, SMSSender}
 
@@ -13,10 +13,8 @@ import api.sms.{BulkSimpleSMS, SimpleSMS, SMSSender}
 object Example {
   def main(args: Array[String]): Unit = {
 
-    import scala.util.{Failure, Success}
-
-    val API_KEY: String = "98f96d823dacff5c49bc752f1696f178b2d450033ced27e6c45d8cc59bf4da6f"
-    val USER_NAME = "nigelnindo"
+    val API_KEY: String = "My Africa's Talking API key"
+    val USER_NAME = "My Africa's talking Username"
 
     /**
      * Create an SMSSender objects. Can be re-used as many times as desired, and does not block the current thread.
@@ -30,18 +28,19 @@ object Example {
      * The library handles failures gracefully, returning an Option type with a value if sending the message
      * was successful, or a None if it wasn't together with the appropriate error message
      *
+     *
      */
 
-    sMSSender.send(BulkSimpleSMS(List("nigel","wiza","hungai"),"msg")).onComplete{
-      case Success(gatewayResponse) => println(gatewayResponse) //Access gateway response here
-      case Failure(err) => //
+    sMSSender.send(SimpleSMS("+254XXXXXX","Hi guys, this is my message")).onSuccess{
+      case gatewayResponse => if (gatewayResponse.error.isEmpty) {
+        gatewayResponse.response // do something with response
+      }
     }
 
     val airtimeSender = AirtimeSender(USER_NAME, API_KEY)
 
-    airtimeSender.send(AirtimeMultiple(List(AirtimeRecipient("+245",10),AirtimeRecipient("+254",20)))).onComplete{
-      case Success(gatewayResponse) => println(gatewayResponse)
-      case Failure(err) =>
+    airtimeSender.send(AirtimeMultiple(List(AirtimeRecipient("+245",10),AirtimeRecipient("+254",20)))).onSuccess{
+      case gatewayResponse => println(gatewayResponse)
     }
 
 

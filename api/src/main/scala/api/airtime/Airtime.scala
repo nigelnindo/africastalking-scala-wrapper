@@ -25,11 +25,11 @@ case class AirtimeSender(username: String, apiKey: String) {
   }
 
   private def httpRequestHelper(recipients: List[AirtimeRecipient]): HttpRequest = {
-    //val recipient_array: String = "[" + recipients.reduceLeft((a,b) => recipientJSONObject(a) + "," + recipientJSONObject(b))+ "]" //fails due to error in types
-    val array: String = "[" + recipients.foldLeft("")((string, airtimeRecipient) => string + "," +recipientJSONObject(airtimeRecipient))+ "]"
-    val recipient_array = "[" + array.substring(2) // fold operation adds a comma to the beginning of the json array, so remove it
+    val array: String =
+      "[" + recipients.foldLeft("")((string, recipient: AirtimeRecipient) => string + "," +recipientJSONObject(recipient))+ "]"
+    val recipient_array =
+      "[" + array.substring(2) // remove comma added to beginning of JSON array by fold operation
     val jsonData = "{" + "\"username\":" + username + ",\"recipients\":" + recipient_array + "}"
-    println(jsonData)
     Http(AIRTIME_URL+"/send") postData jsonData headers ("Accept" -> "application/json",
       "content-type" -> "application/json", "apikey" -> "apikey" )
   }
