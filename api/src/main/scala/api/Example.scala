@@ -1,5 +1,7 @@
 package api
 
+import api.airtime.{AirtimeRecipient, AirtimeMultiple, AirtimeSender}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import api.sms.{BulkSimpleSMS, SimpleSMS, SMSSender}
@@ -34,6 +36,14 @@ object Example {
       case Success(gatewayResponse) => println(gatewayResponse) //Access gateway response here
       case Failure(err) => //
     }
+
+    val airtimeSender = AirtimeSender(USER_NAME, API_KEY)
+
+    airtimeSender.send(AirtimeMultiple(List(AirtimeRecipient("+245",10),AirtimeRecipient("+254",20)))).onComplete{
+      case Success(gatewayResponse) => println(gatewayResponse)
+      case Failure(err) =>
+    }
+
 
     /**
      * The future code block is executed in a different thread (context)

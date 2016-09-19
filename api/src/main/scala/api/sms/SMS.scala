@@ -21,12 +21,12 @@ case class SenderId(mySenderId: String, to: String, message: String) extends SMS
 case class BulkSenderId(mySenderId: String, numbers: List[String], message: String) extends SMS
 case class PremiumSMS(myShortCode: String, myPremiumKeyword: Option[String], number: String, message: String) extends SMS
 
-case class Validated(sms: Option[SMS], error: Option[String])
+private case class Validated(sms: Option[SMS], error: Option[String])
 
 case class SMSSender(username: String, apiKey: String) {
 
   // convenience method for creating HttpRequest objects
-  def httpRequestHelper(msg: String, nums: List[String], sender: Option[String]): HttpRequest = {
+  private def httpRequestHelper(msg: String, nums: List[String], sender: Option[String]): HttpRequest = {
     var seq = Seq("username" -> username, "message" -> msg)
     // Add recipients
     seq = seq ++ Seq[(String,String)]( "to" -> nums.reduceLeft( _ + "," + _ ))
@@ -39,7 +39,7 @@ case class SMSSender(username: String, apiKey: String) {
     Http(SMS_URL) postForm seq headers ("Accept" -> "application/json", "apikey" -> "apiKey")
   }
 
-  def premiumHttpHelper(sms: PremiumSMS): HttpRequest = {
+  private def premiumHttpHelper(sms: PremiumSMS): HttpRequest = {
     var seq = Seq("username" -> username, "message" -> sms.message, "to" -> sms.number,
       "bulkSMSMode" -> "0", "from" -> sms.myShortCode)
 
@@ -63,7 +63,7 @@ case class SMSSender(username: String, apiKey: String) {
     }
   }
 
-  def validate(sms: SMS): Validated = sms match {
+  private def validate(sms: SMS): Validated = sms match {
     // todo: add validation logic i.e check phone numbers are valid
     case SimpleSMS(num,msg) => Validated(Some(sms),None)
     case BulkSimpleSMS(nums,msg) => Validated(Some(sms),None)
@@ -81,7 +81,7 @@ case class SMSSender(username: String, apiKey: String) {
     }
   }
 
-  def sendToGateway(sms: SMS)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
+  private def sendToGateway(sms: SMS)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
     Gateway.send(sms,requestCreator).recover{
       case err => GateWayResponse(None, Some(err.toString))
     }
