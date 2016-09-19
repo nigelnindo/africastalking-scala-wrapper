@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d41fa837-d7a0-469d-8786-c39e3c28de23" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/src/main/scala/api/airtime/Airtime.scala" afterPath="$PROJECT_DIR$/api/src/main/scala/api/airtime/Airtime.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/src/main/scala/api/Example.scala" afterPath="$PROJECT_DIR$/api/src/main/scala/api/Example.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/api/src/main/scala/api/at_gateway/Gateway.scala" afterPath="$PROJECT_DIR$/api/src/main/scala/api/at_gateway/Gateway.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="d41fa837-d7a0-469d-8786-c39e3c28de23" name="Default" comment="" />
     <ignored path="AT-Scala.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -74,8 +68,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state>
-              <first_editor vertical-scroll-proportion="0.14957266">
-                <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+              <first_editor vertical-scroll-proportion="0.8717949">
+                <caret line="70" column="0" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
                 <folding />
               </first_editor>
               <second_editor />
@@ -912,8 +906,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state>
-          <first_editor vertical-scroll-proportion="0.14957266">
-            <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+          <first_editor vertical-scroll-proportion="0.8717949">
+            <caret line="70" column="0" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
             <folding />
           </first_editor>
           <second_editor />

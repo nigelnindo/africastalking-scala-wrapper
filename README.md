@@ -1,7 +1,8 @@
 # africastalking-scala-wrapper
 Future based Scala wrapper providing convenience methods for working with Africa's Talking REST API.
 
-Currently provides support for SMS and Airtime APIs. If you have any questions, or have a feature request, please send an email to nigelnindo@gmail.com
+Currently provides support for SMS and Airtime APIs. Still a work in progress. If you have any questions, bug reports, or have a feature request, please send an email to nigelnindo@gmail.com
+
 
 
 ### Quick Start
