@@ -12,7 +12,7 @@ case class Gateway(uri: String){
   override def toString = uri
 }
 
-case class GatewayResponse(response: Option[String] = None)
+case class GatewayResponse(response: Option[String] = None, errorMessage: Option[String])
 
 trait RequestCreator[A] {
   def createRequest(value: A): HttpRequest
@@ -21,16 +21,17 @@ trait RequestCreator[A] {
 case object Gateway{
 
   def send(request: HttpRequest): Future[GatewayResponse] = Future {
-    GatewayResponse(Some(request.asString.toString))
+    //throw new Exception("just throw something")
+    GatewayResponse(Some(request.asString.toString), None)
   }
 
   def send[T](value: T, requestCreator: RequestCreator[T]): Future[GatewayResponse] = {
     for {
       sendResult <- send(requestCreator.createRequest(value)).recover{
         /**
-         * TODO: Pattern match to catch different error types (i.e No Connection error, AT errors)
+         * TODO: Pattern match to catch common error types (i.e No Connection error, 500 errors)
          */
-        case _ => GatewayResponse(None)
+        case err => GatewayResponse(None, Some(err.toString))
       }
     } yield sendResult
   }

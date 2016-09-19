@@ -17,14 +17,15 @@ case class SimpleSMS(number: String, message: String) extends SMS
 case class BulkSimpleSMS(numbers: List[String], message: String) extends SMS
 case class ShortCode(myShortCode: String, number: String, message: String) extends SMS
 case class BulkShortCode(myShortCode: String, numbers: List[String], message: String) extends SMS
-case class SenderId(mySenderId: String, message: String) extends SMS
+case class SenderId(mySenderId: String, to: String, message: String) extends SMS
 case class BulkSenderId(mySenderId: String, numbers: List[String], message: String) extends SMS
-// case class PremiumSMS() extends SMS
+case class PremiumSMS(myShortCode: String, myPremiumKeyword: Option[String], number: String, message: String) extends SMS
+
+case class Validated(sms: Option[SMS], error: Option[String])
 
 case class SMSSender(username: String, apiKey: String) {
 
-  // TODO: before creating the request, validate the params that have been passed to it
-
+  // convenience method for creating HttpRequest objects
   def httpRequestHelper(msg: String, nums: List[String], sender: Option[String]): HttpRequest = {
     var seq = Seq("username" -> username, "message" -> msg)
     // Add recipients
@@ -32,24 +33,57 @@ case class SMSSender(username: String, apiKey: String) {
     // check if we should add the sender identifier i.e shortCode/senderId to the request
     sender match {
       case Some(_sender) => seq = seq ++ Seq("from" -> _sender)
+      case None =>
     }
+    //println(seq)
     Http(SMS_URL) postForm seq headers ("Accept" -> "application/json", "apikey" -> "apiKey")
   }
 
-  val requestCreator= new RequestCreator[SMS] {
+  def premiumHttpHelper(sms: PremiumSMS): HttpRequest = {
+    var seq = Seq("username" -> username, "message" -> sms.message, "to" -> sms.number,
+      "bulkSMSMode" -> "0", "from" -> sms.myShortCode)
+
+    if (sms.myPremiumKeyword.isDefined){
+      seq = seq ++ Seq("keyword" -> sms.myPremiumKeyword.get)
+    }
+
+    Http(SMS_URL) postForm seq headers ("Accept" -> "application/json", "apikey" -> "apiKey")
+
+  }
+
+  val requestCreator = new RequestCreator[SMS] {
     override def createRequest(value: SMS): HttpRequest = value match {
-      case SimpleSMS(num,msg) => httpRequestHelper(msg, List(msg), None)
+      case SimpleSMS(num,msg) => httpRequestHelper(msg, List(num), None)
       case BulkSimpleSMS(nums, msg) => httpRequestHelper(msg, nums, None)
-      case ShortCode(sc, num, msg) => Http(SMS_URL)
-      case BulkShortCode(sc, nums, msg) => Http(SMS_URL)
-      case SenderId(sid, num, msg) => Http(SMS_URL)
-      case BulkSenderId(sid, nums, msg) => Http(SMS_URL)
+      case ShortCode(sc, num, msg) => httpRequestHelper(msg, List(num), Some(sc))
+      case BulkShortCode(sc, nums, msg) => httpRequestHelper(msg, nums, Some(sc))
+      case SenderId(sid, num, msg) => httpRequestHelper(msg, List(num), Some(sid))
+      case BulkSenderId(sid, nums, msg) => httpRequestHelper(msg, nums, Some(sid))
+      case _sms: PremiumSMS => premiumHttpHelper(_sms)
     }
   }
 
+  def validate(sms: SMS): Validated = sms match {
+    // todo: add validation logic i.e check phone numbers are valid
+    case SimpleSMS(num,msg) => Validated(Some(sms),None)
+    case BulkSimpleSMS(nums,msg) => Validated(Some(sms),None)
+    case ShortCode(sc, num, msg) => Validated(Some(sms),None)
+    case BulkShortCode(sc, nums, msg) => Validated(Some(sms),None)
+    case SenderId(sid, num, msg) => Validated(Some(sms),None)
+    case BulkSenderId(sid, nums, msg) => Validated(Some(sms),None)
+    case PremiumSMS(sc, kw, num, msg) => Validated(Some(sms),None)
+  }
+
   def send(sms: SMS)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
+    validate(sms) match {
+      case Validated(_sms,err) if err.isEmpty => sendToGateway(_sms.get)
+      case Validated(_sms,err) if err.isDefined => Future {GatewayResponse(None, Some(err.get))}
+    }
+  }
+
+  def sendToGateway(sms: SMS)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
     Gateway.send(sms,requestCreator).recover{
-      case _ => GatewayResponse(None)
+      case err => GatewayResponse(None, Some(err.toString))
     }
   }
 
