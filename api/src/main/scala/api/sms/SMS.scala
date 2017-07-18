@@ -1,12 +1,13 @@
 package api.sms
 
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.RawHeader
+
 import scala.concurrent.{ExecutionContext, Future}
 
 import api.common.Common.SMS_URL
 
 import api.at_gateway.{GateWayResponse, RequestCreator, Gateway}
-
-import scalaj.http.{HttpRequest, Http}
 
 /**
  * Created by nigelnindo on 9/17/16.
@@ -35,8 +36,10 @@ case class SMSSender(username: String, apiKey: String) {
       case Some(_sender) => seq = seq ++ Seq("from" -> _sender)
       case None =>
     }
-    //println(seq)
-    Http(SMS_URL) postForm seq headers ("Accept" -> "application/json", "apikey" -> "apiKey")
+
+    HttpRequest(HttpMethods.GET, SMS_URL)
+      .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
+
   }
 
   private def premiumHttpHelper(sms: PremiumSMS): HttpRequest = {
@@ -47,7 +50,8 @@ case class SMSSender(username: String, apiKey: String) {
       seq = seq ++ Seq("keyword" -> sms.myPremiumKeyword.get)
     }
 
-    Http(SMS_URL) postForm seq headers ("Accept" -> "application/json", "apikey" -> "apiKey")
+    HttpRequest(HttpMethods.GET, SMS_URL)
+      .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
 
   }
 
