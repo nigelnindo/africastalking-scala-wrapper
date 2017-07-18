@@ -31,7 +31,7 @@ case object Gateway{
     //GateWayResponse(Some(request.asString.toString), None)
     val responseFuture: Future[HttpResponse] =
       Http().singleRequest(request)
-    responseFuture.map(x => GateWayResponse(Some(x._3.toString), None))
+    responseFuture.map(x => GateWayResponse(Some(x.entity.toString), None))
   }
 
   def send[T](value: T, requestCreator: RequestCreator[T]): Future[GateWayResponse] = {
