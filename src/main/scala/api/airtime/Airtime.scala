@@ -32,7 +32,7 @@ case class AirtimeSender(username: String, apiKey: String) {
       "[" + array.substring(2) // remove comma added to beginning of JSON array by fold operation
     val jsonData = "{" + "\"username\":" + username + ",\"recipients\":" + recipient_array + "}"
 
-    HttpRequest(HttpMethods.GET, AIRTIME_URL+"/send")
+    HttpRequest(HttpMethods.POST, AIRTIME_URL+"/send")
       .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
         .withEntity(jsonData)
 
