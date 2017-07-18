@@ -2,12 +2,13 @@ package api.sms
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.client.RequestBuilding._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import api.common.Common.SMS_URL
-
 import api.at_gateway.{GateWayResponse, RequestCreator, Gateway}
+import api.model.{PremiumSmsRequest, SmsRequest}
 
 /**
  * Created by nigelnindo on 9/17/16.
@@ -28,30 +29,20 @@ case class SMSSender(username: String, apiKey: String) {
 
   // convenience method for creating HttpRequest objects
   private def httpRequestHelper(msg: String, nums: List[String], sender: Option[String]): HttpRequest = {
-    var seq = Seq("username" -> username, "message" -> msg)
-    // Add recipients
-    seq = seq ++ Seq[(String,String)]( "to" -> nums.reduceLeft( _ + "," + _ ))
-    // check if we should add the sender identifier i.e shortCode/senderId to the request
-    sender match {
-      case Some(_sender) => seq = seq ++ Seq("from" -> _sender)
-      case None =>
-    }
 
-    HttpRequest(HttpMethods.GET, SMS_URL)
+    val requestObject = SmsRequest(username, msg, nums.reduceLeft( _ + "," + _), sender)
+
+    Get(SMS_URL, requestObject)
       .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
 
   }
 
   private def premiumHttpHelper(sms: PremiumSMS): HttpRequest = {
-    var seq = Seq("username" -> username, "message" -> sms.message, "to" -> sms.number,
-      "bulkSMSMode" -> "0", "from" -> sms.myShortCode)
 
-    if (sms.myPremiumKeyword.isDefined){
-      seq = seq ++ Seq("keyword" -> sms.myPremiumKeyword.get)
-    }
+    val requestObject = PremiumSmsRequest(username, sms.message, sms.number, "0", sms.myShortCode, sms.myPremiumKeyword)
 
-    HttpRequest(HttpMethods.GET, SMS_URL)
-      .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
+    Get(SMS_URL, requestObject)
+        .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
 
   }
 

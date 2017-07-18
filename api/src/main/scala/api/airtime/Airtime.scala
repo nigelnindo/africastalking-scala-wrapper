@@ -34,6 +34,7 @@ case class AirtimeSender(username: String, apiKey: String) {
 
     HttpRequest(HttpMethods.GET, AIRTIME_URL+"/send")
       .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
+        .withEntity(jsonData)
 
   }
 

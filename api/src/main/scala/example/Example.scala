@@ -1,10 +1,9 @@
-package api
+package example
 
-import api.airtime.{AirtimeRecipient, AirtimeMultiple, AirtimeSender}
+import api.airtime.{AirtimeMultiple, AirtimeRecipient, AirtimeSender}
+import api.sms.{SMSSender, SimpleSMS}
 
-import scala.concurrent.ExecutionContext.Implicits.global // context for running future
-
-import api.sms.{BulkSimpleSMS, SimpleSMS, SMSSender}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Created by nigelnindo on 9/17/16.
