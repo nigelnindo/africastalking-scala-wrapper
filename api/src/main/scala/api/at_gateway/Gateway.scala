@@ -22,6 +22,7 @@ case object Gateway{
 
   def send(request: HttpRequest): Future[GateWayResponse] = Future {
     //throw new Exception("just throw something")
+    //TODO: Send actual HTTP requests to Africa's Talking
     GateWayResponse(Some(request.asString.toString), None)
   }
 
