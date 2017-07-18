@@ -10,6 +10,9 @@ import api.common.Common.SMS_URL
 import api.at_gateway.{GateWayResponse, RequestCreator, Gateway}
 import api.model.{PremiumSmsRequest, SmsRequest}
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import api.serializers.Marshal._
+
 /**
  * Created by nigelnindo on 9/17/16.
  */
@@ -25,14 +28,15 @@ case class PremiumSMS(myShortCode: String, myPremiumKeyword: Option[String], num
 
 private case class Validated(sms: Option[SMS], error: Option[String])
 
-case class SMSSender(username: String, apiKey: String) {
+case class SMSSender(username: String, apiKey: String)
+                    (implicit ec: ExecutionContext) {
 
   // convenience method for creating HttpRequest objects
   private def httpRequestHelper(msg: String, nums: List[String], sender: Option[String]): HttpRequest = {
 
     val requestObject = SmsRequest(username, msg, nums.reduceLeft( _ + "," + _), sender)
 
-    Get(SMS_URL, requestObject)
+    Post(SMS_URL, requestObject)
       .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
 
   }
@@ -41,7 +45,7 @@ case class SMSSender(username: String, apiKey: String) {
 
     val requestObject = PremiumSmsRequest(username, sms.message, sms.number, "0", sms.myShortCode, sms.myPremiumKeyword)
 
-    Get(SMS_URL, requestObject)
+    Post(SMS_URL, requestObject)
         .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
 
   }
@@ -70,14 +74,14 @@ case class SMSSender(username: String, apiKey: String) {
     case PremiumSMS(sc, kw, num, msg) => Validated(Some(sms),None)
   }
 
-  def send(sms: SMS)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
+  def send(sms: SMS): Future[GateWayResponse] = {
     validate(sms) match {
       case Validated(_sms,err) if err.isEmpty => sendToGateway(_sms.get)
       case Validated(_sms,err) if err.isDefined => Future {GateWayResponse(None, Some(err.get))}
     }
   }
 
-  private def sendToGateway(sms: SMS)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
+  private def sendToGateway(sms: SMS): Future[GateWayResponse] = {
     Gateway.send(sms,requestCreator).recover{
       case err => GateWayResponse(None, Some(err.toString))
     }
