@@ -13,5 +13,9 @@ lazy val root = (project in file(".")).
 lazy val api = (project in file("api")).
   settings(commonSettings: _*)
   .settings(
-    libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0"
+    libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.3.0",
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-http" % "10.0.9",
+      "com.typesafe.akka" %% "akka-http-testkit" % "10.0.9" % Test
+    )
   )

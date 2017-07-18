@@ -64,7 +64,8 @@ case class SMSSender(username: String, apiKey: String) {
   }
 
   private def validate(sms: SMS): Validated = sms match {
-    // todo: add validation logic i.e check phone numbers are valid
+    // TODO: add validation logic i.e check phone numbers are valid
+    // TODO: create a package for all your validations. Even better, allow user to define their own validations.
     case SimpleSMS(num,msg) => Validated(Some(sms),None)
     case BulkSimpleSMS(nums,msg) => Validated(Some(sms),None)
     case ShortCode(sc, num, msg) => Validated(Some(sms),None)
