@@ -5,7 +5,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import api.at_gateway.{Gateway, GateWayResponse, RequestCreator}
 import api.common.Common.AIRTIME_URL
 
-import scalaj.http.{Http, HttpRequest}
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.RawHeader
 
 /**
  * Created by nigelnindo on 9/19/16.
@@ -30,8 +31,11 @@ case class AirtimeSender(username: String, apiKey: String) {
     val recipient_array =
       "[" + array.substring(2) // remove comma added to beginning of JSON array by fold operation
     val jsonData = "{" + "\"username\":" + username + ",\"recipients\":" + recipient_array + "}"
-    Http(AIRTIME_URL+"/send") postData jsonData headers ("Accept" -> "application/json",
-      "content-type" -> "application/json", "apikey" -> "apikey" )
+
+    HttpRequest(HttpMethods.GET, AIRTIME_URL+"/send")
+      .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
+        .withEntity(jsonData)
+
   }
 
   private val requestCreator = new RequestCreator[Airtime] {
