@@ -32,16 +32,17 @@ object Example {
 
     sMSSender.send(SimpleSMS("+254XXXXXX","Hi guys, this is my message")).onSuccess{
       case gatewayResponse => if (gatewayResponse.error.isEmpty) {
-        gatewayResponse.response // do something with response
+        println(gatewayResponse.response) // do something with response
       }
     }
 
+    /*
     val airtimeSender = AirtimeSender(USER_NAME, API_KEY)
 
     airtimeSender.send(AirtimeMultiple(List(AirtimeRecipient("+245",10),AirtimeRecipient("+254",20)))).onSuccess{
       case gatewayResponse => println(gatewayResponse)
     }
-
+    */
 
     /**
      * The future code block is executed in a different thread (context)

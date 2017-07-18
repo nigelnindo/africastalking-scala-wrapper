@@ -34,19 +34,52 @@ case class SMSSender(username: String, apiKey: String)
   // convenience method for creating HttpRequest objects
   private def httpRequestHelper(msg: String, nums: List[String], sender: Option[String]): HttpRequest = {
 
-    val requestObject = SmsRequest(username, msg, nums.reduceLeft( _ + "," + _), sender)
+    var seq = Seq("username" -> username, "message" -> msg)
+    // Add recipients
+      seq = seq ++ Seq[(String,String)]( "to" -> nums.reduceLeft( _ + "," + _ ))
+    // check if we should add the sender identifier i.e shortCode/senderId to the request
+      sender match {
+      case Some(_sender) => seq = seq ++ Seq("from" -> _sender)
+      case None =>
+    }
 
+    HttpRequest(HttpMethods.POST, SMS_URL)
+      .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey","apiKey"))
+      .withEntity(FormData(seq.toMap).toEntity)
+
+    /** Code commented out below replaces everything above. Doesn't work because we can't
+      * set Content-Type to 'application/json'
+      */
+    /*
+    val requestObject = SmsRequest(username, msg, nums.reduceLeft( _ + "," + _), sender)
     Post(SMS_URL, requestObject)
-      .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
+      .withHeaders(RawHeader("Accept","application/json"),
+        RawHeader("apikey","apiKey"))
+    */
 
   }
 
   private def premiumHttpHelper(sms: PremiumSMS): HttpRequest = {
 
-    val requestObject = PremiumSmsRequest(username, sms.message, sms.number, "0", sms.myShortCode, sms.myPremiumKeyword)
+    var seq = Seq("username" -> username, "message" -> sms.message, "to" -> sms.number,
+                "bulkSMSMode" -> "0", "from" -> sms.myShortCode)
+    if (sms.myPremiumKeyword.isDefined){
+        seq = seq ++ Seq("keyword" -> sms.myPremiumKeyword.get)
+      }
 
+    HttpRequest(HttpMethods.POST, SMS_URL)
+      .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey","apiKey"))
+      .withEntity(FormData(seq.toMap).toEntity)
+
+    /**
+      * Code below can also replace code above if Content-Type is resolved
+      */
+    /*
+    val requestObject = PremiumSmsRequest(username, sms.message, sms.number, "0", sms.myShortCode, sms.myPremiumKeyword)
     Post(SMS_URL, requestObject)
-        .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
+        .withHeaders(RawHeader("Accept","application/json"),
+          RawHeader("apikey","apiKey"))
+    */
 
   }
 
