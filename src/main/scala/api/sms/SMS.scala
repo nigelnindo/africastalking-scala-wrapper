@@ -3,6 +3,7 @@ package api.sms
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.client.RequestBuilding._
+import api.validations.{SMSValidations, Validated}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +27,6 @@ case class SenderId(mySenderId: String, to: String, message: String) extends SMS
 case class BulkSenderId(mySenderId: String, numbers: List[String], message: String) extends SMS
 case class PremiumSMS(myShortCode: String, myPremiumKeyword: Option[String], number: String, message: String) extends SMS
 
-private case class Validated(sms: Option[SMS], error: Option[String])
 
 case class SMSSender(username: String, apiKey: String)
                     (implicit ec: ExecutionContext) {
@@ -95,20 +95,8 @@ case class SMSSender(username: String, apiKey: String)
     }
   }
 
-  private def validate(sms: SMS): Validated = sms match {
-    // TODO: add validation logic i.e check phone numbers are valid
-    // TODO: create a package for all your validations. Even better, allow user to define their own validations.
-    case SimpleSMS(num,msg) => Validated(Some(sms),None)
-    case BulkSimpleSMS(nums,msg) => Validated(Some(sms),None)
-    case ShortCode(sc, num, msg) => Validated(Some(sms),None)
-    case BulkShortCode(sc, nums, msg) => Validated(Some(sms),None)
-    case SenderId(sid, num, msg) => Validated(Some(sms),None)
-    case BulkSenderId(sid, nums, msg) => Validated(Some(sms),None)
-    case PremiumSMS(sc, kw, num, msg) => Validated(Some(sms),None)
-  }
-
   def send(sms: SMS): Future[GateWayResponse] = {
-    validate(sms) match {
+    SMSValidations.validate(sms) match {
       case Validated(_sms,err) if err.isEmpty => sendToGateway(_sms.get)
       case Validated(_sms,err) if err.isDefined => Future {GateWayResponse(None, Some(err.get))}
     }
