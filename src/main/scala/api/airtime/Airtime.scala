@@ -33,7 +33,7 @@ case class AirtimeSender(username: String, apiKey: String) {
     val jsonData = "{" + "\"username\":" + username + ",\"recipients\":" + recipient_array + "}"
 
     HttpRequest(HttpMethods.POST, AIRTIME_URL+"/send")
-      .withHeaders(RawHeader("accept","application/json"), RawHeader("apikey","apiKey"))
+      .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey","apiKey"))
         .withEntity(jsonData)
 
   }
