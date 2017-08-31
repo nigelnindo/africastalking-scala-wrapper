@@ -2,7 +2,7 @@ package api.airtime
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import api.at_gateway.{Gateway, GateWayResponse, RequestCreator}
+import api.at_gateway.{Gateway, GatewayResponse, RequestCreator}
 import api.common.Common.AIRTIME_URL
 
 import akka.http.scaladsl.model._
@@ -50,16 +50,16 @@ case class AirtimeSender(username: String, apiKey: String) {
     case AirtimeMultiple(recipients) => Validated(Some(airtime),None)
   }
 
-  def send(airtime: Airtime)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
+  def send(airtime: Airtime)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
     validate(airtime) match {
       case Validated(_airtime,err) if err.isEmpty => sendToGateway(_airtime.get)
-      case Validated(_airtime,err) if err.isDefined => Future{GateWayResponse(None, Some(err.get))}
+      case Validated(_airtime,err) if err.isDefined => Future{GatewayResponse(None, Some(err.get))}
     }
   }
 
-  private def sendToGateway(airtime: Airtime)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
+  private def sendToGateway(airtime: Airtime)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
     Gateway.send(airtime,requestCreator).recover{
-      case err => GateWayResponse(None,Some(err.toString))
+      case err => GatewayResponse(None,Some(err.toString))
     }
   }
 

@@ -27,10 +27,9 @@ object Example {
      * The library handles failures gracefully, returning an Option type with a value if sending the message
      * was successful, or a None if it wasn't together with the appropriate error message
      *
-     *
      */
 
-    sMSSender.send(SimpleSMS("+254XXXXXX","Hi guys, this is my message")).onSuccess{
+    sMSSender.send(SimpleSMS(List("+254XXXXXX"),"Hi guys, this is my message")).onSuccess{
       case gatewayResponse => if (gatewayResponse.error.isEmpty) {
         println(gatewayResponse.response) // do something with response
       }
