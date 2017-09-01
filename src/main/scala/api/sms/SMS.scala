@@ -3,7 +3,8 @@ package api.sms
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.client.RequestBuilding._
-import api.validations.{SMSValidations, Validated}
+import api.validations.SMSValidations.Validated
+import api.validations.{SMSValidations}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,8 +25,16 @@ case class ShortCode(myShortCode: String, numbers: List[String], message: String
 case class SenderId(mySenderId: String, numbers: List[String], message: String) extends SMS
 case class PremiumSMS(myShortCode: String, myPremiumKeyword: Option[String], number: String, message: String) extends SMS
 
+/**
+  * SmsSender requires your username and apiKey.
+  *
+  * You can optionally pass in url as a final parameter. This is
+  * important for testing your code using Africa's Talking's sandbox
+  * environment, or if the production URL's defined in the library
+  * are outdated.
+  */
 
-case class SMSSender(username: String, apiKey: String)
+case class SmsSender(username: String, apiKey: String, url: String = SMS_URL)
                     (implicit ec: ExecutionContext) {
 
   // convenience method for creating HttpRequest objects
@@ -33,15 +42,16 @@ case class SMSSender(username: String, apiKey: String)
 
     var seq = Seq("username" -> username, "message" -> msg)
     // Add recipients
-      seq = seq ++ Seq[(String,String)]( "to" -> nums.reduceLeft( _ + "," + _ ))
+    seq = seq ++ Seq[(String,String)]( "to" -> nums.reduceLeft( _ + "," + _ ))
     // check if we should add the sender identifier i.e shortCode/senderId to the request
-      sender match {
+    sender match {
       case Some(_sender) => seq = seq ++ Seq("from" -> _sender)
       case None =>
     }
 
-    HttpRequest(HttpMethods.POST, SMS_URL)
-      .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey","apiKey"))
+    //application/x-www-form-urlencoded
+    HttpRequest(HttpMethods.POST, url)
+      .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey",apiKey))
       .withEntity(FormData(seq.toMap).toEntity)
 
     /** Code commented out below replaces everything above. Doesn't work because we can't
@@ -49,11 +59,10 @@ case class SMSSender(username: String, apiKey: String)
       */
     /*
     val requestObject = SmsRequest(username, msg, nums.reduceLeft( _ + "," + _), sender)
-    Post(SMS_URL, requestObject)
+    Post(url, requestObject)
       .withHeaders(RawHeader("Accept","application/json"),
-        RawHeader("apikey","apiKey"))
+        RawHeader("apikey", apiKey))
     */
-
   }
 
   private def premiumHttpHelper(sms: PremiumSMS): HttpRequest = {
@@ -64,8 +73,8 @@ case class SMSSender(username: String, apiKey: String)
         seq = seq ++ Seq("keyword" -> sms.myPremiumKeyword.get)
       }
 
-    HttpRequest(HttpMethods.POST, SMS_URL)
-      .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey","apiKey"))
+    HttpRequest(HttpMethods.POST, url)
+      .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey",apiKey))
       .withEntity(FormData(seq.toMap).toEntity)
 
     /**
@@ -73,9 +82,9 @@ case class SMSSender(username: String, apiKey: String)
       */
     /*
     val requestObject = PremiumSmsRequest(username, sms.message, sms.number, "0", sms.myShortCode, sms.myPremiumKeyword)
-    Post(SMS_URL, requestObject)
+    Post(url, requestObject)
         .withHeaders(RawHeader("Accept","application/json"),
-          RawHeader("apikey","apiKey"))
+          RawHeader("apikey", apiKey))
     */
 
   }
@@ -98,7 +107,7 @@ case class SMSSender(username: String, apiKey: String)
 
   private def sendToGateway(sms: SMS): Future[GatewayResponse] = {
     Gateway.send(sms,requestCreator).recover{
-      case err => GatewayResponse(None, Some(err.toString))
+      case err => GatewayResponse(None, Some(err))
     }
   }
 

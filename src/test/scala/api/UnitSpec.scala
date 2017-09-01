@@ -13,7 +13,7 @@ class UnitSpec extends AsyncFlatSpec with Matchers {
   val API_KEY: String = "My Africa's Talking API key"
   val USER_NAME = "My Africa's talking Username"
 
-  val sMSSender = SMSSender(USER_NAME, API_KEY)
+  val sMSSender = SmsSender(USER_NAME, API_KEY)
 
   it should "not allow an empty list of numbers for BulkSimpleSMS, BulkShortCode, and BulkSenderId" in {
     val bulkSimpleSMSFuture = sMSSender.send(SimpleSMS(List(),"Send a message"))

@@ -14,7 +14,7 @@ case class Gateway(uri: String){
   override def toString = uri
 }
 
-case class GatewayResponse(response: Option[String], error: Option[String])
+case class GatewayResponse(response: Option[String], error: Option[Throwable])
 
 trait RequestCreator[A] {
   def createRequest(value: A): HttpRequest
@@ -36,9 +36,11 @@ case object Gateway{
   def send(request: HttpRequest)
           (implicit ec: ExecutionContext): Future[GatewayResponse] =  {
     //TODO: Send actual HTTP requests to Africa's Talking
+    println(request)
     val responseFuture: Future[HttpResponse] =
       Http().singleRequest(request)
-    responseFuture.map(x => {
+    responseFuture.map( x => {
+      println(x.toString())
       GatewayResponse(Some(x.entity.toString), None)
     })
   }
@@ -52,7 +54,7 @@ case object Gateway{
              (implicit ec: ExecutionContext): Future[GatewayResponse] = {
     for {
       sendResult <- send(requestCreator.createRequest(value)).recover{
-        case err => GatewayResponse(None, Some(err.toString))
+        case err => GatewayResponse(None, Some(err))
       }
     } yield sendResult
   }
