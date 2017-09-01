@@ -1,7 +1,8 @@
 package example
 
 import api.airtime.{AirtimeMultiple, AirtimeRecipient, AirtimeSender}
-import api.sms.{SMSSender, SimpleSMS}
+import api.common.Common
+import api.sms.{SmsSender, SimpleSMS}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -12,14 +13,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object Example {
   def main(args: Array[String]): Unit = {
 
-    val API_KEY: String = "My Africa's Talking API key"
-    val USER_NAME = "My Africa's talking Username"
+    val API_KEY= "YOUR_AT_API_KEY"
+    val USER_NAME = "YOUR_USERNAME"
 
     /**
      * Create an SMSSender objects. Can be re-used as many times as desired, and does not block the current thread.
      */
 
-    val sMSSender = SMSSender(USER_NAME, API_KEY)
+    val sMSSender = SmsSender(USER_NAME, API_KEY, Common.SANDBOX_BASE_URL + "/messaging")
 
     /**
      * Use the sMSSender object to send a simple message
@@ -27,12 +28,13 @@ object Example {
      * The library handles failures gracefully, returning an Option type with a value if sending the message
      * was successful, or a None if it wasn't together with the appropriate error message
      *
-     *
      */
 
-    sMSSender.send(SimpleSMS("+254XXXXXX","Hi guys, this is my message")).onSuccess{
+    sMSSender.send(SimpleSMS(List("+254706250610"),"Hi guys, this is my example message.")).onSuccess{
       case gatewayResponse => if (gatewayResponse.error.isEmpty) {
         println(gatewayResponse.response) // do something with response
+      } else {
+        print(gatewayResponse.error.get)
       }
     }
 

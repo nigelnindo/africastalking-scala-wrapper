@@ -1,8 +1,11 @@
 package api.airtime
 
+import api.validations.AirtimeValidations
+import api.validations.AirtimeValidations.Validated
+
 import scala.concurrent.{ExecutionContext, Future}
 
-import api.at_gateway.{Gateway, GateWayResponse, RequestCreator}
+import api.at_gateway.{Gateway, GatewayResponse, RequestCreator}
 import api.common.Common.AIRTIME_URL
 
 import akka.http.scaladsl.model._
@@ -16,8 +19,6 @@ case class AirtimeSingle(recipient: AirtimeRecipient) extends Airtime
 case class AirtimeMultiple(recipient: List[AirtimeRecipient]) extends Airtime
 
 case class AirtimeRecipient(number: String, amount: Int)
-
-private case class Validated(value: Option[Airtime], err: Option[String])
 
 case class AirtimeSender(username: String, apiKey: String) {
 
@@ -35,7 +36,6 @@ case class AirtimeSender(username: String, apiKey: String) {
     HttpRequest(HttpMethods.POST, AIRTIME_URL+"/send")
       .withHeaders(RawHeader("Accept","application/json"), RawHeader("apikey","apiKey"))
         .withEntity(jsonData)
-
   }
 
   private val requestCreator = new RequestCreator[Airtime] {
@@ -45,21 +45,16 @@ case class AirtimeSender(username: String, apiKey: String) {
     }
   }
 
-  private def validate(airtime: Airtime): Validated = airtime match {
-    case AirtimeSingle(recipient) => Validated(Some(airtime),None)
-    case AirtimeMultiple(recipients) => Validated(Some(airtime),None)
-  }
-
-  def send(airtime: Airtime)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
-    validate(airtime) match {
+  def send(airtime: Airtime)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
+    AirtimeValidations.validate(airtime) match {
       case Validated(_airtime,err) if err.isEmpty => sendToGateway(_airtime.get)
-      case Validated(_airtime,err) if err.isDefined => Future{GateWayResponse(None, Some(err.get))}
+      case Validated(_airtime,err) if err.isDefined => Future{GatewayResponse(None, Some(err.get))}
     }
   }
 
-  private def sendToGateway(airtime: Airtime)(implicit ex: ExecutionContext): Future[GateWayResponse] = {
+  private def sendToGateway(airtime: Airtime)(implicit ex: ExecutionContext): Future[GatewayResponse] = {
     Gateway.send(airtime,requestCreator).recover{
-      case err => GateWayResponse(None,Some(err.toString))
+      case err => GatewayResponse(None,Some(err))
     }
   }
 

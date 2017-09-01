@@ -32,22 +32,13 @@ The `send` method returns a `Future[GateWayResponse]`. You can compose it togeth
 ## `SMSSender`
 You can pass the following to its `send` method
 ```scala
-SimpleSMS(number: String, message: String)
+SimpleSMS(numbers: List[String], message: String)
 ```
 ```scala
-BulkSimpleSMS(numbers: List[String], message: String)
+ShortCode(myShortCode: String, numbers: List[String], message: String)
 ```
 ```scala
-ShortCode(myShortCode: String, number: String, message: String)
-```
-```scala
-BulkShortCode(myShortCode: String, numbers: List[String], message: String)
-```
-```scala
-SenderId(mySenderId: String, to: String, message: String)
-```
-```scala
-BulkSenderId(mySenderId: String, numbers: List[String], message: String)
+SenderId(mySenderId: String, numbers: List[String], message: String)
 ```
 ```scala
 PremiumSMS(myShortCode: String, myPremiumKeyword: Option[String], number: String, message: String)
